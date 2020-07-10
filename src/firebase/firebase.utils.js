@@ -1,27 +1,27 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
-// import {FIREBASE_API_KEY, AUTH_DOMAIN, DATABASE_URL, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID } from "./firebase.env.js"
+import {FIREBASE_API_KEY, AUTH_DOMAIN, DATABASE_URL, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID } from "./firebase.env.js"
 
-// const config = {
-//   apiKey: FIREBASE_API_KEY,
-//   authDomain: AUTH_DOMAIN,
-//   databaseURL: DATABASE_URL,
-//   projectId: PROJECT_ID,
-//   storageBucket: STORAGE_BUCKET,
-//   messagingSenderId: MESSAGING_SENDER_ID,
-//   appId: APP_ID,
+const config = {
+  apiKey: FIREBASE_API_KEY,
+  authDomain: AUTH_DOMAIN,
+  databaseURL: DATABASE_URL,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
 
-// };
-var config = {
-  apiKey: "AIzaSyAGCvDCXLER4Yo2I3K0YqYwYeUID2ueIZc",
-  authDomain: "react-ecommerce-course.firebaseapp.com",
-  databaseURL: "https://react-ecommerce-course.firebaseio.com",
-  projectId: "react-ecommerce-course",
-  storageBucket: "react-ecommerce-course.appspot.com",
-  messagingSenderId: "1078946331316",
-  appId: "1:1078946331316:web:e751a9976ffec7431db5e1"
 };
+// var config = {
+//   apiKey: "AIzaSyAGCvDCXLER4Yo2I3K0YqYwYeUID2ueIZc",
+//   authDomain: "react-ecommerce-course.firebaseapp.com",
+//   databaseURL: "https://react-ecommerce-course.firebaseio.com",
+//   projectId: "react-ecommerce-course",
+//   storageBucket: "react-ecommerce-course.appspot.com",
+//   messagingSenderId: "1078946331316",
+//   appId: "1:1078946331316:web:e751a9976ffec7431db5e1"
+// };
 
 // Initialize Firebase
 firebase.initializeApp(config);
@@ -45,10 +45,40 @@ export const createUserProfileDocument = async(userAuth, additionalData) =>{
   return userRef;
 }
 
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) =>{
+  const collectionRef = firestore.collection(collectionKey);
+  console.log("collectionRef: ", collectionRef);
+
+  const batch = firestore.batch();
+  objectsToAdd.forEach(obj =>{
+    const newDocRef = collectionRef.doc();
+    console.log("newDocRef: ", newDocRef)
+    batch.set(newDocRef, obj);
+  })
+
+  return await batch.commit();
+}
+
+export const convertCollectionsSnapshotToMap = collections => {
+  const transformedCollections = collections.docs.map(doc => {
+    const {title, items} = doc.data();
+    return {
+      routeName: encodeURI(title.toLowerCase()),
+      id: doc.id,
+      title, items
+    }
+  })
+  return transformedCollections.reduce((acumulator, collection) => {
+    acumulator[collection.title.toLowerCase()] = collection;
+    return acumulator;
+  },{});
+}
+
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 
 const provider = new firebase.auth.GoogleAuthProvider();
+
 provider.setCustomParameters({prompt:"select_account"});
 export const signInWithGoogle = () => auth.signInWithPopup(provider);
 

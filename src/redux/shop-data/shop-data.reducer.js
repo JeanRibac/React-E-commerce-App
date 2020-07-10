@@ -1,13 +1,19 @@
-import SHOP_DATA from "../../pages/shop/shop.data"
+import ShopActionsTypes from "./shop-data.types"
+
 const INITIAL_STATE = {
-    collections : SHOP_DATA
+    collections: null
 };
 
 
 const shopReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        default:
+        case ShopActionsTypes.UPDATE_COLLECTION:
+            return {
+                ...state, 
+                collections: action.payload
+            }
+        default: 
             return state;
     }
 }
-export default shopReducer
+export default shopReducer;
